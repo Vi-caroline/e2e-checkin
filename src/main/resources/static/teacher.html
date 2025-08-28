@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>E2E Check-in • Aprovação</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container header-wrap">
+      <img src="/logo.svg" class="logo" alt="E2E">
+      <nav class="nav">
+        <a href="/">Home</a>
+        <a href="/checkin.html">Check-in</a>
+        <a href="/teacher.html">Aprovação</a>
+        <a href="/swagger-ui.html" target="_blank">Swagger</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container section">
+    <div class="card">
+      <div class="inline" style="justify-content:space-between; margin-bottom:10px">
+        <h2 style="margin:0">Check-ins Pendentes</h2>
+        <div class="inline">
+          <button id="reload" class="btn btn-ghost">Recarregar</button>
+          <span id="info" class="small"></span>
+        </div>
+      </div>
+
+      <div class="list-head">
+        <div>ID</div><div>E-mail</div><div>Data</div><div>Status</div><div>Ações</div>
+      </div>
+      <div id="list"></div>
+
+      <div id="feedback" class="small" style="margin-top:10px;"></div>
+    </div>
+  </main>
+
+  <!-- Modal Login -->
+  <div class="modal-backdrop" id="loginBackdrop">
+    <div class="modal">
+      <h3>Autenticação</h3>
+      <p class="small">Informe usuário e senha para aprovar/rejeitar.</p>
+      <div class="field">
+        <label for="loginUser">Usuário</label>
+        <input id="loginUser" placeholder="e2etreinamentos">
+        <div id="loginUserErr" class="error" style="display:none"></div>
+      </div>
+      <div class="field">
+        <label for="loginPass">Senha</label>
+        <input id="loginPass" type="password" placeholder="e2etreinamentos">
+        <div id="loginPassErr" class="error" style="display:none"></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="loginCancel">Cancelar</button>
+        <button class="btn btn-primary" id="loginOk">Entrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Rejeição -->
+  <div class="modal-backdrop" id="rejectBackdrop">
+    <div class="modal">
+      <h3>Rejeitar check-in</h3>
+      <p class="small">Opcionalmente informe um motivo para a rejeição.</p>
+      <div class="field">
+        <label for="rejectReason">Motivo (opcional)</label>
+        <input id="rejectReason" placeholder="Ex.: ausência confirmada">
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="rejectCancel">Cancelar</button>
+        <button class="btn btn-primary" id="rejectOk">Confirmar rejeição</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container cols">
+      <div><img src="/logo.svg" class="logo" alt="E2E"><p class="small">Excelência é repetição de boas práticas.</p></div>
+      <div>
+        <div><a href="https://www.linkedin.com/company/73182826/" target="_blank">@e2etreinamentos</a></div>
+        <div><a href="https://www.e2etreinamentos.com.br" target="_blank">www.e2etreinamentos.com.br</a></div>
+        <div><a href="https://wa.me/5511940053248" target="_blank">+55 (11) 94005-3248 (WhatsApp)</a></div>
+      </div>
+      <div class="small">© E2E Treinamentos</div>
+    </div>
+  </footer>
+
+  <script>
+    // --- Login simples (apenas front) ---
+    const LS_AUTH = 'e2e_auth_ok';
+    function isAuth(){ return localStorage.getItem(LS_AUTH) === '1'; }
+    function requireAuth(){ if (!isAuth()) openLogin(); }
+    function openLogin(){ document.getElementById('loginBackdrop').classList.add('show'); }
+    function closeLogin(){ document.getElementById('loginBackdrop').classList.remove('show'); }
+
+    document.getElementById('loginOk').onclick = () => {
+      const u = document.getElementById('loginUser').value.trim();
+      const p = document.getElementById('loginPass').value.trim();
+      document.getElementById('loginUserErr').style.display = 'none';
+      document.getElementById('loginPassErr').style.display = 'none';
+      if (u!=='e2etreinamentos' || p!=='e2etreinamentos'){
+        if (u!=='e2etreinamentos') { const e=document.getElementById('loginUserErr'); e.textContent='Usuário inválido.'; e.style.display='block'; }
+        if (p!=='e2etreinamentos') { const e=document.getElementById('loginPassErr'); e.textContent='Senha inválida.'; e.style.display='block'; }
+        return;
+      }
+      localStorage.setItem(LS_AUTH, '1');
+      closeLogin(); load();
+    };
+    document.getElementById('loginCancel').onclick = () => { window.location.href = '/'; };
+
+    // --- Lista / ações ---
+    const elList = document.getElementById('list');
+    const elInfo = document.getElementById('info');
+    const feedback = document.getElementById('feedback');
+    let rejectId = null;
+
+    function showFeedback(msg, ok){
+      feedback.textContent = msg;
+      feedback.style.color = ok ? '#86efac' : '#fca5a5';
+    }
+
+    async function load(){
+      elInfo.textContent = 'Carregando...';
+      try {
+        const r = await fetch('/api/checkins/pending');
+        if (!r.ok) throw new Error(await r.text());
+        const data = await r.json();
+        elList.innerHTML = '';
+        if (!data.length){ elList.innerHTML = '<div class="card small" style="text-align:center">Nenhum check-in pendente.</div>'; elInfo.textContent=''; return; }
+        data.forEach(c=>{
+          const row = document.createElement('div'); row.className='list-row card';
+          row.innerHTML = `
+            <div>#${c.id}</div>
+            <div>${c.studentEmail}</div>
+            <div>${c.lessonDate}</div>
+            <div><span class="badge">${c.status}</span></div>
+            <div class="inline">
+              <button class="btn btn-primary" data-act="approve" data-id="${c.id}">Aprovar</button>
+              <button class="btn btn-ghost" data-act="reject" data-id="${c.id}">Rejeitar</button>
+            </div>`;
+          elList.appendChild(row);
+        });
+        elInfo.textContent = `Total: ${data.length}`;
+      } catch(e){ showFeedback('Erro ao carregar pendentes.', false); }
+    }
+
+    elList.addEventListener('click', async (ev)=>{
+      const b = ev.target.closest('button'); if(!b) return;
+      const id = b.getAttribute('data-id'); const act = b.getAttribute('data-act');
+      if (act === 'approve'){
+        const r = await fetch(`/api/checkins/${id}/approve`, {method:'POST'});
+        if (!r.ok) { showFeedback('Falha ao aprovar.', false); return; }
+        showFeedback('Check-in aprovado.', true); load(); return;
+      }
+      if (act === 'reject'){
+        rejectId = id; openReject(); return;
+      }
+    });
+
+    // --- Modal rejeição ---
+    const rejectBackdrop = document.getElementById('rejectBackdrop');
+    function openReject(){ rejectBackdrop.classList.add('show'); }
+    function closeReject(){ rejectBackdrop.classList.remove('show'); document.getElementById('rejectReason').value=''; }
+    document.getElementById('rejectCancel').onclick = closeReject;
+    document.getElementById('rejectOk').onclick = async () => {
+      const reason = document.getElementById('rejectReason').value.trim();
+      const r = await fetch(`/api/checkins/${rejectId}/reject`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ reason })
+      });
+      if (!r.ok) { showFeedback('Falha ao rejeitar.', false); closeReject(); return; }
+      showFeedback('Check-in rejeitado.', true); closeReject(); load();
+    };
+
+    // fluxo inicial
+    requireAuth();
+    if (isAuth()) load();
+  </script>
+</body>
+</html>

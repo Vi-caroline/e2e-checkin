@@ -1,0 +1,116 @@
+:root{
+  --bg:#0b1220;           /* fundo escuro elegante */
+  --card:#0f172a;         /* cartões */
+  --brand:#10b981;        /* verde E2E */
+  --brand-2:#22d3ee;      /* ciano para detalhes */
+  --text:#e5e7eb;         /* texto principal */
+  --muted:#94a3b8;        /* texto secundário */
+  --border:#1f2937;
+  --shadow:0 10px 30px rgba(0,0,0,.25);
+}
+
+*{box-sizing:border-box}
+html, body {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;  /* empurra o footer para baixo */
+}
+body{
+  margin:0; font-family:system-ui,Segoe UI,Roboto,Arial;
+  color:var(--text); background:linear-gradient(180deg,#0b1220 0%, #0b1220 40%, #0e1630 100%);
+}
+
+/* layout */
+.container{max-width:1080px; margin:0 auto; padding:0 20px}
+
+/* header */
+.header{
+  position:sticky; top:0; z-index:20;
+  backdrop-filter:saturate(160%) blur(6px);
+  background:rgba(11,18,32,.75); border-bottom:1px solid var(--border);
+}
+.header-wrap{display:flex; align-items:center; gap:16px; padding:14px 0}
+.logo{height:36px}
+.nav{margin-left:auto; display:flex; gap:14px; flex-wrap:wrap}
+.nav a{
+  color:var(--text); text-decoration:none; padding:8px 12px; border-radius:10px;
+  border:1px solid transparent;
+}
+.nav a:hover{border-color:rgba(255,255,255,.15); background:rgba(255,255,255,.03)}
+
+/* hero */
+.hero{
+  padding:72px 0 36px;
+  background:
+    radial-gradient(800px 300px at 10% -10%, rgba(34,211,238,.25), transparent 60%),
+    radial-gradient(800px 300px at 90% -10%, rgba(16,185,129,.25), transparent 60%);
+}
+.hero h1{
+  font-size:clamp(28px, 3.6vw, 52px); line-height:1.05; margin:0 0 12px;
+}
+.lead{color:var(--muted); font-size:clamp(15px, 1.5vw, 18px); margin:0 0 24px}
+.cta{
+  display:inline-flex; align-items:center; gap:10px; padding:13px 18px; border-radius:14px;
+  color:#03150d; background:
+    linear-gradient(90deg, var(--brand) 0%, #34d399 50%, var(--brand-2) 100%);
+  text-decoration:none; font-weight:700; box-shadow:var(--shadow);
+}
+
+/* cards */
+.card{
+  background:var(--card); border:1px solid var(--border); border-radius:18px; padding:18px; box-shadow:var(--shadow);
+}
+
+/* sections */
+.section{padding:36px 0}
+
+/* forms */
+label{display:block; margin:10px 0 6px; color:#cbd5e1; font-weight:600}
+input{width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--border); background:#0b1220; color:var(--text)}
+button, .btn{
+  cursor:pointer; border:0; border-radius:12px; padding:12px 16px; font-weight:700;
+}
+.btn-primary{background:var(--brand); color:#052a1f}
+.btn-ghost{background:transparent; border:1px solid var(--border); color:var(--text)}
+.inline{display:flex; gap:12px; align-items:center}
+
+/* table-ish list */
+.list-head, .list-row{
+  display:grid; grid-template-columns: 80px 1fr 1fr 140px 180px; gap:12px; align-items:center;
+}
+.list-head{color:#cbd5e1; margin-bottom:8px}
+.badge{display:inline-block; padding:4px 10px; border-radius:999px; background:#1e293b; color:#a7f3d0; font-size:.85rem}
+
+/* footer */
+.footer {
+  margin-top: auto; /* fixa no fim da coluna flex */
+  border-top: 1px solid var(--border);
+  background: rgba(0,0,0,.25);
+}
+.footer .cols{display:grid; gap:18px; grid-template-columns: 1fr; padding:22px 0}
+.footer a{color:var(--text); text-decoration:none}
+.footer a:hover{color:var(--brand)}
+@media(min-width:720px){ .footer .cols{grid-template-columns: 1fr auto auto} }
+.small{color:var(--muted); font-size:.9rem}
+
+
+
+/* ... (resto do seu styles.css que já enviamos) ... */
+
+.field { margin-bottom: 12px; }
+.help { font-size: .9rem; color: var(--muted); margin-top: 6px; }
+.error { color: #fca5a5; margin-top: 6px; }
+
+.modal-backdrop{
+  position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+  background:rgba(0,0,0,.5); z-index:50;
+}
+.modal{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:18px; width:min(520px, 92%); box-shadow:var(--shadow); }
+.modal.show + .modal-backdrop, .modal-backdrop.show{ display:flex; }
+.modal h3{ margin:0 0 10px }
+.modal .actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:12px }

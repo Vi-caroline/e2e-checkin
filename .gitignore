@@ -1,0 +1,49 @@
+# ---------------------------------------
+# Build / Maven
+# ---------------------------------------
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+
+# ---------------------------------------
+# IDEs e configs locais
+# ---------------------------------------
+# IntelliJ
+*.iml
+.idea/
+*.ipr
+*.iws
+
+# Eclipse
+.classpath
+.project
+.settings/
+.apt_generated/
+.factorypath
+.springBeans
+.sts4-cache/
+
+# VSCode
+.vscode/
+
+# ---------------------------------------
+# Logs
+# ---------------------------------------
+*.log
+*.out
+
+# ---------------------------------------
+# Arquivos do sistema operacional
+# ---------------------------------------
+.DS_Store
+Thumbs.db
+
+# ---------------------------------------
+# Testes / relatórios
+# ---------------------------------------
+surefire-reports/
+test-output/

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>E2E Check-in • Aluno</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container header-wrap">
+      <img src="/logo.svg" class="logo" alt="E2E">
+      <nav class="nav">
+        <a href="/">Home</a>
+        <a href="/checkin.html">Check-in</a>
+        <a href="/teacher.html" id="nav-approve">Aprovação</a>
+        <a href="/swagger-ui.html" target="_blank">Swagger</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container section">
+    <div class="card" style="max-width:680px;margin:0 auto">
+      <h2 style="margin:0 0 6px">Check-in do Aluno</h2>
+      <p class="small" style="margin-top:0">Preencha seus dados e envie o check-in. Apenas no dia da aula.</p>
+
+      <form id="form" novalidate>
+        <div class="field">
+          <label for="email">E-mail do aluno</label>
+          <input id="email" type="email" required placeholder="seuemail@exemplo.com">
+          <div id="emailError" class="error" style="display:none"></div>
+        </div>
+
+        <div class="field">
+          <label for="lessonDate">Data da aula</label>
+          <input id="lessonDate" type="date" required>
+          <div class="help">Só é permitido check-in na data da aula (hoje).</div>
+          <div id="dateError" class="error" style="display:none"></div>
+        </div>
+
+        <div class="inline" style="margin-top:10px">
+          <button class="btn btn-primary" type="submit">Enviar check-in</button>
+          <a class="btn btn-ghost" href="/teacher.html">Ver pendentes</a>
+          <span id="status" class="small"></span>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container cols">
+      <div><img src="/logo.svg" class="logo" alt="E2E"><p class="small">Aprender é hábito. Um dia de cada vez.</p></div>
+      <div>
+        <div><a href="https://www.linkedin.com/company/73182826/" target="_blank">@e2etreinamentos</a></div>
+        <div><a href="https://www.e2etreinamentos.com.br" target="_blank">www.e2etreinamentos.com.br</a></div>
+        <div><a href="https://wa.me/5511940053248" target="_blank">+55 (11) 94005-3248 (WhatsApp)</a></div>
+      </div>
+      <div class="small">© E2E Treinamentos</div>
+    </div>
+  </footer>
+
+  <script>
+    // pré-preenche com hoje e desliga seleção fora de hoje
+    const hoje = new Date().toISOString().slice(0,10);
+    const inputDate = document.getElementById('lessonDate');
+    inputDate.value = hoje;
+    inputDate.min = hoje;
+    inputDate.max = hoje;
+
+    const emailInput = document.getElementById('email');
+    const emailError = document.getElementById('emailError');
+    const dateError = document.getElementById('dateError');
+    const status = document.getElementById('status');
+
+    function clearErrors(){ emailError.style.display='none'; dateError.style.display='none'; status.textContent=''; }
+
+    function isValidEmail(v){
+      return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(v || '');
+    }
+
+    document.getElementById('form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErrors();
+
+      const email = emailInput.value.trim();
+      const date = inputDate.value;
+
+      let hasError = false;
+      if (!isValidEmail(email)) { emailError.textContent = 'Informe um e-mail válido.'; emailError.style.display='block'; hasError = true; }
+      if (date !== hoje) { dateError.textContent = 'Check-in permitido apenas hoje (data da aula).'; dateError.style.display='block'; hasError = true; }
+      if (hasError) return;
+
+      status.textContent = 'Enviando...';
+
+      try {
+        const r = await fetch('/api/checkins', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ email, lessonDate: date })
+        });
+        const txt = await r.text();
+        if (!r.ok) {
+          status.textContent = (txt || 'Erro ao enviar.').replace(/"/g,'');
+          status.style.color = '#fca5a5';
+          return;
+        }
+        status.textContent = 'Check-in enviado com sucesso!'; status.style.color = '#86efac';
+        emailInput.value = '';
+      } catch (err) {
+        status.textContent = 'Falha de rede. Tente novamente.'; status.style.color = '#fca5a5';
+      }
+    });
+  </script>
+</body>
+</html>
