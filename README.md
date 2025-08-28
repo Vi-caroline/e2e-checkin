@@ -18,7 +18,7 @@ Aplicação para controle de presença dos alunos da **E2E Treinamentos**, compo
 ---
 
 ## 📖 Documentação de Negócio
-As regras e fluxos estão descritos em [BUSINESS_RULES.md](./BUSINESS_RULES.md).
+As regras e fluxos estão descritos em [REGRAS_SISTEMA.md](./regras.sistemas.md).
 
 ---
 
