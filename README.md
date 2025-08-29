@@ -25,6 +25,8 @@ As regras e fluxos estão descritos em `REGRAS_SISTEMA.md`.
 mvn clean install
 
 
+
+
 # Projeto E2E Checkin
 
 Este projeto foi fornecido pelo professor **[Anderson Barbosa]** como material de aprendizado no curso de QA da E2E Treinamentos.
